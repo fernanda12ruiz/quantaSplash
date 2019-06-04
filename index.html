@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<title>Quanta – Creative Space</title>
+	<link rel="icon" type="image/png" href="images/favicon.png">
+	<link rel="stylesheet" href="style.css">
+
+	<script src="libraries/p5.js"></script>
+	<script src="libraries/p5.dom.js"></script>
+	<script src="sketch.js"></script>
+
+</head>
+<body>
+	<div id="info" data-scroll>
+		<div data-scroll-content class="scrollC">
+			<div id="top">
+				<div class="logo">
+					<img class="inner" src="images/inner.svg" alt="">
+					<img class="outer" src="images/outer.svg" alt="">
+				</div>
+				<h1>Space to be <span id="tag"></span></h1>
+			</div>
+
+			<p>
+				Quanta is a groundbreaking new kind of space designed to serve the local creative
+				community. A space where ambitious creators can make significant
+				projects that wouldn’t happen on their own, but rather by collaborating with one another.<br><br>
+				We are built for creatives but open to everyone by believing that fostering strong meaningful
+				connections between society and the creative community can take design to the next level
+				and tip the scale towards a more human world.
+			</p>
+			<a href="https://www.instagram.com/quantaspacemx/" target="_blank">Instagram</a>
+			<a href="https://www.facebook.com/quantaspacemx" target="_blank">Facebook</a>
+			<a href="https://twitter.com/quantaspacemx" target="_blank">Twitter</a>
+			<a href="https://open.spotify.com/user/9vime95l2m6oen42ylyxbs4mm?si=ar6MvRefQ8-ZheJXqgEyJQ" target="_blank">Spotify</a>
+		</div>
+	</div>
+
+	<script>
+		const math = {
+			lerp: (a, b, n) => {
+				return (1 - n) * a + n * b
+			},
+			norm: (value, min, max) => {
+					return (value - min) / (max - min)
+			}
+		}
+
+		const config = {
+			height: window.innerHeight,
+			width: window.innerWidth
+		}
+
+		class Smooth {
+			constructor() {
+				this.bindMethods()
+
+				this.data = {
+					ease: 0.1,
+					current: 0,
+					last: 0
+				}
+
+				this.dom = {
+					el: document.querySelector('[data-scroll]'),
+					content: document.querySelector('[data-scroll-content]')
+				}
+
+				this.rAF = null
+
+				this.init()
+			}
+
+			bindMethods() {
+				['scroll', 'run', 'resize']
+				.forEach((fn) => this[fn] = this[fn].bind(this))
+			}
+
+			setStyles() {
+				this.dom.el.style.position = 'fixed';
+				this.dom.el.style.top = 0;
+				this.dom.el.style.left = 0;
+				this.dom.el.style.height = '120%'
+				this.dom.el.style.width = '100%'
+				this.dom.el.style.overflow = 'hidden'
+			}
+
+			setHeight() {
+				document.body.style.height = `${this.dom.content.offsetHeight}px`
+			}
+
+			resize() {
+				this.setHeight()
+				this.scroll()
+			}
+
+			scroll() {
+				this.data.current = window.scrollY
+			}
+
+			run() {
+				this.data.last = math.lerp(this.data.last, this.data.current, this.data.ease)
+				this.data.last = Math.floor(this.data.last * 100) / 100
+
+				const diff = this.data.current - this.data.last
+				const acc = diff / config.width
+				const velo =+ acc
+				const skew = velo * 50
+
+				this.dom.content.style.transform = `translate3d(0, -${this.data.last.toFixed(2)}px, 0) skewY(${skew}deg)`
+
+				this.requestAnimationFrame()
+			}
+
+			on(requestAnimationFrame = true) {
+				this.setStyles()
+				this.setHeight()
+				this.addEvents()
+
+				requestAnimationFrame && this.requestAnimationFrame()
+			}
+
+			off(cancelAnimationFrame = true) {
+				cancelAnimationFrame && this.cancelAnimationFrame()
+
+				this.removeEvents()
+			}
+
+			requestAnimationFrame() {
+				this.rAF = requestAnimationFrame(this.run)
+			}
+
+			cancelAnimationFrame() {
+				cancelAnimationFrame(this.rAF)
+			}
+
+			destroy() {
+				document.body.style.height = ''
+
+				this.data = null
+
+				this.removeEvents()
+				this.cancelAnimationFrame()
+			}
+
+			resize() {
+				this.setHeight()
+			}
+
+			addEvents() {
+				window.addEventListener('resize', this.resize, { passive: true })
+				window.addEventListener('scroll', this.scroll, { passive: true })
+			}
+
+			removeEvents() {
+				window.removeEventListener('resize', this.resize, { passive: true })
+				window.removeEventListener('scroll', this.scroll, { passive: true })
+			}
+
+			init() {
+				this.on()
+			}
+		}
+
+		const smooth = new Smooth()
+	</script>
+</body>
+</html>
